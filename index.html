@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Games by Sajin</title>
+  <title>HTML Games by Sajin</title>
   <style>
     :root {
       --bg: linear-gradient(to right, #667eea, #764ba2);
@@ -127,7 +127,6 @@
       background: var(--accent);
     }
 
-    /* Tic-Tac-Toe */
     .game.ttt {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -141,7 +140,7 @@
       aspect-ratio: 1;
       background: #00000033;
       border-radius: 12px;
-      font-size: 2rem;
+      font-size: 2.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -161,22 +160,18 @@
         font-size: 0.9em;
         padding: 8px;
       }
-
       button {
         font-size: 0.9em;
         padding: 8px 16px;
       }
-
       .scoreboard {
         font-size: 1em;
       }
-
       .mole {
         font-size: 1.7rem;
       }
-
       .cell {
-        font-size: 2.5rem;
+        font-size: 2rem;
       }
     }
   </style>
@@ -188,7 +183,6 @@
       <button onclick="showGame('ttt')">Tic-Tac-Toe</button>
     </div>
 
-    <!-- Whack-a-Mole -->
     <div class="card game-section active" id="wam">
       <h2>🎯 Whack-a-Mole</h2>
       <div class="scoreboard">
@@ -199,10 +193,15 @@
       <button onclick="startWamGame()">Start Game</button>
     </div>
 
-    <!-- Tic-Tac-Toe -->
     <div class="card game-section" id="ttt">
       <h2>❌ Tic-Tac-Toe ⭕</h2>
-      <div class="scoreboard" id="ttt-status">Player X's turn</div>
+      <div class="scoreboard">
+        <div id="ttt-status">Player ❌'s turn</div>
+        <div>
+          ❌ Score: <span id="score-x">0</span> |
+          ⭕ Score: <span id="score-o">0</span>
+        </div>
+      </div>
       <div class="game ttt" id="ttt-board"></div>
       <button onclick="resetTtt()">Restart</button>
     </div>
@@ -213,7 +212,6 @@
   </footer>
 
   <script>
-    // Tab switching
     function showGame(id) {
       document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
@@ -221,7 +219,6 @@
       document.querySelector(`.tabs button[onclick*="${id}"]`).classList.add('active');
     }
 
-    // Whack-a-Mole
     const wamBoard = document.getElementById("wam-board");
     const wamScore = document.getElementById("wam-score");
     const wamTime = document.getElementById("wam-time");
@@ -276,66 +273,74 @@
       }, 700);
     }
 
-	// Tic-Tac-Toe
-	const tttBoard = document.getElementById("ttt-board");
-	const tttStatus = document.getElementById("ttt-status");
-	let tttCells = [];
-	let currentPlayer = "X";
-	let gameOver = false;
+    const tttBoard = document.getElementById("ttt-board");
+    const tttStatus = document.getElementById("ttt-status");
+    let tttCells = [];
+    let currentPlayer = "X";
+    let gameOver = false;
+    let scoreX = 0;
+    let scoreO = 0;
 
-	const emojiMap = {
-	  X: "❌",
-	  O: "⭕"
-	};
+    const emojiMap = {
+      X: "❌",
+      O: "⭕"
+    };
 
-	function initTtt() {
-	  tttBoard.innerHTML = "";
-	  tttCells = [];
-	  for (let i = 0; i < 9; i++) {
-		const cell = document.createElement("div");
-		cell.className = "cell";
-		cell.addEventListener("click", () => markCell(i));
-		tttCells.push("");
-		tttBoard.appendChild(cell);
-	  }
-	  currentPlayer = "X";
-	  gameOver = false;
-	  tttStatus.textContent = `Player ${emojiMap[currentPlayer]}'s turn`;
-	}
+    function initTtt() {
+      tttBoard.innerHTML = "";
+      tttCells = [];
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.addEventListener("click", () => markCell(i));
+        tttCells.push("");
+        tttBoard.appendChild(cell);
+      }
+      currentPlayer = "X";
+      gameOver = false;
+      tttStatus.textContent = `Player ${emojiMap[currentPlayer]}'s turn`;
+    }
 
-	function markCell(i) {
-	  if (tttCells[i] || gameOver) return;
-	  tttCells[i] = currentPlayer;
-	  tttBoard.children[i].textContent = emojiMap[currentPlayer];
-	  if (checkTttWin()) {
-		tttStatus.textContent = `🎉 Player ${emojiMap[currentPlayer]} wins!`;
-		gameOver = true;
-		return;
-	  }
-	  if (tttCells.every(c => c)) {
-		tttStatus.textContent = `⚖️ It's a draw!`;
-		gameOver = true;
-		return;
-	  }
-	  currentPlayer = currentPlayer === "X" ? "O" : "X";
-	  tttStatus.textContent = `Player ${emojiMap[currentPlayer]}'s turn`;
-	}
+    function markCell(i) {
+      if (tttCells[i] || gameOver) return;
+      tttCells[i] = currentPlayer;
+      tttBoard.children[i].textContent = emojiMap[currentPlayer];
+      if (checkTttWin()) {
+        tttStatus.textContent = `🎉 Player ${emojiMap[currentPlayer]} wins!`;
+        if (currentPlayer === "X") {
+          scoreX++;
+          document.getElementById("score-x").textContent = scoreX;
+        } else {
+          scoreO++;
+          document.getElementById("score-o").textContent = scoreO;
+        }
+        gameOver = true;
+        return;
+      }
+      if (tttCells.every(c => c)) {
+        tttStatus.textContent = `⚖️ It's a draw!`;
+        gameOver = true;
+        return;
+      }
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      tttStatus.textContent = `Player ${emojiMap[currentPlayer]}'s turn`;
+    }
 
-	function checkTttWin() {
-	  const wins = [
-		[0,1,2],[3,4,5],[6,7,8],
-		[0,3,6],[1,4,7],[2,5,8],
-		[0,4,8],[2,4,6]
-	  ];
-	  return wins.some(([a,b,c]) =>
-		tttCells[a] && tttCells[a] === tttCells[b] && tttCells[a] === tttCells[c]);
-	}
+    function checkTttWin() {
+      const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      return wins.some(([a,b,c]) =>
+        tttCells[a] && tttCells[a] === tttCells[b] && tttCells[a] === tttCells[c]);
+    }
 
-	function resetTtt() {
-	  initTtt();
-	}
+    function resetTtt() {
+      initTtt();
+    }
 
-	initTtt();
+    initTtt();
   </script>
 </body>
 </html>

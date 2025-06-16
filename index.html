@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Games by Sajin</title>
+  <style>
+    :root {
+      --bg: linear-gradient(to right, #667eea, #764ba2);
+      --glass: rgba(255, 255, 255, 0.1);
+      --blur: blur(15px);
+      --white: #fff;
+      --text: #fff;
+      --accent: #ffffff25;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      padding: 20px;
+      flex: 1;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: var(--glass);
+      color: var(--white);
+      font-size: 1em;
+      cursor: pointer;
+      backdrop-filter: var(--blur);
+      transition: background 0.3s;
+    }
+
+    .tabs button.active {
+      background: var(--accent);
+    }
+
+    .card {
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .game-section {
+      display: none;
+    }
+
+    .game-section.active {
+      display: block;
+    }
+
+    .scoreboard {
+      font-size: 1.1em;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .game.wam {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .hole {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #222;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 15px rgba(255,255,255,0.1), 0 5px 15px rgba(0,0,0,0.4);
+    }
+
+    .mole {
+      position: absolute;
+      bottom: -100%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2rem;
+      transition: bottom 0.3s ease;
+      cursor: pointer;
+    }
+
+    .mole.up {
+      bottom: 10%;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      background: var(--glass);
+      border: none;
+      border-radius: 30px;
+      color: var(--text);
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: var(--accent);
+    }
+
+    /* Tic-Tac-Toe */
+    .game.ttt {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .cell {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #00000033;
+      border-radius: 12px;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      color: #eee;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 480px) {
+      .tabs button {
+        font-size: 0.9em;
+        padding: 8px;
+      }
+
+      button {
+        font-size: 0.9em;
+        padding: 8px 16px;
+      }
+
+      .scoreboard {
+        font-size: 1em;
+      }
+
+      .mole {
+        font-size: 1.7rem;
+      }
+
+      .cell {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tabs">
+      <button class="active" onclick="showGame('wam')">Whack-a-Mole</button>
+      <button onclick="showGame('ttt')">Tic-Tac-Toe</button>
+    </div>
+
+    <!-- Whack-a-Mole -->
+    <div class="card game-section active" id="wam">
+      <h2>🎯 Whack-a-Mole</h2>
+      <div class="scoreboard">
+        ⏱ Time Left: <span id="wam-time">30</span>s |
+        🎯 Score: <span id="wam-score">0</span>
+      </div>
+      <div class="game wam" id="wam-board"></div>
+      <button onclick="startWamGame()">Start Game</button>
+    </div>
+
+    <!-- Tic-Tac-Toe -->
+    <div class="card game-section" id="ttt">
+      <h2>❌ Tic-Tac-Toe ⭕</h2>
+      <div class="scoreboard" id="ttt-status">Player X's turn</div>
+      <div class="game ttt" id="ttt-board"></div>
+      <button onclick="resetTtt()">Restart</button>
+    </div>
+  </div>
+
+  <footer>
+    Created with ❤️ by Sajin
+  </footer>
+
+  <script>
+    // Tab switching
+    function showGame(id) {
+      document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.tabs button[onclick*="${id}"]`).classList.add('active');
+    }
+
+    // Whack-a-Mole
+    const wamBoard = document.getElementById("wam-board");
+    const wamScore = document.getElementById("wam-score");
+    const wamTime = document.getElementById("wam-time");
+    let wamScoreVal = 0, wamTimeLeft = 30;
+    let wamInterval = null;
+
+    for (let i = 0; i < 9; i++) {
+      const hole = document.createElement("div");
+      hole.className = "hole";
+      hole.innerHTML = `<div class="mole">🐹</div>`;
+      wamBoard.appendChild(hole);
+    }
+
+    const wamHoles = document.querySelectorAll(".hole");
+
+    function startWamGame() {
+      wamScoreVal = 0;
+      wamTimeLeft = 30;
+      wamScore.textContent = 0;
+      wamTime.textContent = 30;
+
+      clearInterval(wamInterval);
+      wamInterval = setInterval(() => {
+        wamTimeLeft--;
+        wamTime.textContent = wamTimeLeft;
+        if (wamTimeLeft <= 0) {
+          clearInterval(wamInterval);
+          alert("⏹ Time's up! Your score: " + wamScoreVal);
+        } else {
+          showMole();
+        }
+      }, 800);
+    }
+
+    function showMole() {
+      const i = Math.floor(Math.random() * 9);
+      const mole = wamHoles[i].querySelector(".mole");
+      mole.classList.add("up");
+
+      function whack() {
+        wamScoreVal++;
+        wamScore.textContent = wamScoreVal;
+        mole.classList.remove("up");
+        mole.removeEventListener("click", whack);
+      }
+
+      mole.addEventListener("click", whack);
+
+      setTimeout(() => {
+        mole.classList.remove("up");
+        mole.removeEventListener("click", whack);
+      }, 700);
+    }
+
+    // Tic-Tac-Toe
+    const tttBoard = document.getElementById("ttt-board");
+    const tttStatus = document.getElementById("ttt-status");
+    let tttCells = [];
+    let currentPlayer = "X";
+    let gameOver = false;
+
+    function initTtt() {
+      tttBoard.innerHTML = "";
+      tttCells = [];
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.addEventListener("click", () => markCell(i));
+        tttCells.push("");
+        tttBoard.appendChild(cell);
+      }
+      currentPlayer = "X";
+      gameOver = false;
+      tttStatus.textContent = "Player X's turn";
+    }
+
+    function markCell(i) {
+      if (tttCells[i] || gameOver) return;
+      tttCells[i] = currentPlayer;
+      tttBoard.children[i].textContent = currentPlayer;
+      if (checkTttWin()) {
+        tttStatus.textContent = `🎉 Player ${currentPlayer} wins!`;
+        gameOver = true;
+        return;
+      }
+      if (tttCells.every(c => c)) {
+        tttStatus.textContent = `⚖️ It's a draw!`;
+        gameOver = true;
+        return;
+      }
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      tttStatus.textContent = `Player ${currentPlayer}'s turn`;
+    }
+
+    function checkTttWin() {
+      const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      return wins.some(([a,b,c]) =>
+        tttCells[a] && tttCells[a] === tttCells[b] && tttCells[a] === tttCells[c]);
+    }
+
+    function resetTtt() {
+      initTtt();
+    }
+
+    // Init on load
+    initTtt();
+  </script>
+</body>
+</html>

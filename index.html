@@ -176,7 +176,7 @@
       }
 
       .cell {
-        font-size: 1.5rem;
+        font-size: 2.5rem;
       }
     }
   </style>
@@ -276,62 +276,66 @@
       }, 700);
     }
 
-    // Tic-Tac-Toe
-    const tttBoard = document.getElementById("ttt-board");
-    const tttStatus = document.getElementById("ttt-status");
-    let tttCells = [];
-    let currentPlayer = "X";
-    let gameOver = false;
+	// Tic-Tac-Toe
+	const tttBoard = document.getElementById("ttt-board");
+	const tttStatus = document.getElementById("ttt-status");
+	let tttCells = [];
+	let currentPlayer = "X";
+	let gameOver = false;
 
-    function initTtt() {
-      tttBoard.innerHTML = "";
-      tttCells = [];
-      for (let i = 0; i < 9; i++) {
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        cell.addEventListener("click", () => markCell(i));
-        tttCells.push("");
-        tttBoard.appendChild(cell);
-      }
-      currentPlayer = "X";
-      gameOver = false;
-      tttStatus.textContent = "Player X's turn";
-    }
+	const emojiMap = {
+	  X: "❌",
+	  O: "⭕"
+	};
 
-    function markCell(i) {
-      if (tttCells[i] || gameOver) return;
-      tttCells[i] = currentPlayer;
-      tttBoard.children[i].textContent = currentPlayer;
-      if (checkTttWin()) {
-        tttStatus.textContent = `🎉 Player ${currentPlayer} wins!`;
-        gameOver = true;
-        return;
-      }
-      if (tttCells.every(c => c)) {
-        tttStatus.textContent = `⚖️ It's a draw!`;
-        gameOver = true;
-        return;
-      }
-      currentPlayer = currentPlayer === "X" ? "O" : "X";
-      tttStatus.textContent = `Player ${currentPlayer}'s turn`;
-    }
+	function initTtt() {
+	  tttBoard.innerHTML = "";
+	  tttCells = [];
+	  for (let i = 0; i < 9; i++) {
+		const cell = document.createElement("div");
+		cell.className = "cell";
+		cell.addEventListener("click", () => markCell(i));
+		tttCells.push("");
+		tttBoard.appendChild(cell);
+	  }
+	  currentPlayer = "X";
+	  gameOver = false;
+	  tttStatus.textContent = `Player ${emojiMap[currentPlayer]}'s turn`;
+	}
 
-    function checkTttWin() {
-      const wins = [
-        [0,1,2],[3,4,5],[6,7,8],
-        [0,3,6],[1,4,7],[2,5,8],
-        [0,4,8],[2,4,6]
-      ];
-      return wins.some(([a,b,c]) =>
-        tttCells[a] && tttCells[a] === tttCells[b] && tttCells[a] === tttCells[c]);
-    }
+	function markCell(i) {
+	  if (tttCells[i] || gameOver) return;
+	  tttCells[i] = currentPlayer;
+	  tttBoard.children[i].textContent = emojiMap[currentPlayer];
+	  if (checkTttWin()) {
+		tttStatus.textContent = `🎉 Player ${emojiMap[currentPlayer]} wins!`;
+		gameOver = true;
+		return;
+	  }
+	  if (tttCells.every(c => c)) {
+		tttStatus.textContent = `⚖️ It's a draw!`;
+		gameOver = true;
+		return;
+	  }
+	  currentPlayer = currentPlayer === "X" ? "O" : "X";
+	  tttStatus.textContent = `Player ${emojiMap[currentPlayer]}'s turn`;
+	}
 
-    function resetTtt() {
-      initTtt();
-    }
+	function checkTttWin() {
+	  const wins = [
+		[0,1,2],[3,4,5],[6,7,8],
+		[0,3,6],[1,4,7],[2,5,8],
+		[0,4,8],[2,4,6]
+	  ];
+	  return wins.some(([a,b,c]) =>
+		tttCells[a] && tttCells[a] === tttCells[b] && tttCells[a] === tttCells[c]);
+	}
 
-    // Init on load
-    initTtt();
+	function resetTtt() {
+	  initTtt();
+	}
+
+	initTtt();
   </script>
 </body>
 </html>
